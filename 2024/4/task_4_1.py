@@ -40,7 +40,6 @@ S.S.S.S.SS
 Take a look at the little Elf's word search. How many times does XMAS appear?
 """
 
-import re
 from pathlib import Path
 from typing import List, Union
 
@@ -64,20 +63,61 @@ def from_txt(input_file: Union[Path, str]) -> List[List[str]]:
     return letter_grid
 
 
-def search_lines(line: List[str]) -> int:
+def _check_string(line: str, keyword: str) -> bool:
     """Search the given line for `XMAS` or `SAMX`.
 
     Args:
-        line: The line to search.
+        line: Check the line string for the given keyword.
+        keyword: The keyword to check for.
 
     Returns:
-        The number of times the substring appear in the given string.
+        True if the keyword or reverse is in the line, False otherwise.
     """
-    substrings_found = 0
-    substrings_found += len(re.findall("XMAS", "".join(line)))
-    substrings_found += len(re.findall("SAMX", "".join(line)))
+    in_string = False
+    if keyword in line or keyword[::-1] in line:
+        in_string = True
 
-    return substrings_found
+    return in_string
+
+
+def _check_small_grid(grid: List[List[str]]) -> int:
+    """Check the small grid in an X pattern and the top of the grid.
+
+    Args:
+        grid: The grid to check.
+
+    Returns:
+        The number of substrings found.
+    """
+    substring_finds = 0
+
+    # Horizontal check.
+    if _check_string("".join([el[0] for el in grid]), "XMAS"):
+        substring_finds += 1
+
+    # Vertical check.
+    if _check_string("".join(grid[0]), "XMAS"):
+        substring_finds += 1
+
+    # Diagonal check `\`.
+    if len(grid) == len(grid[0]):
+        line = ""
+        for x in range(len(grid)):
+            line += grid[x][x]
+
+        if _check_string(line, "XMAS"):
+            substring_finds += 1
+
+    # Diagonal check `/`.
+    if len(grid) == len(grid[0]):
+        line = ""
+        for x in range(len(grid)):
+            line += grid[x][-(x + 1)]
+
+        if _check_string(line, "XMAS"):
+            substring_finds += 1
+
+    return substring_finds
 
 
 def task() -> int:
@@ -89,67 +129,17 @@ def task() -> int:
     letter_grid = from_txt(__INPUT_FILE)
     substring_finds = 0
 
-    # search horizontal lines.
-    for row in letter_grid:
-        substring_finds += search_lines(row)
+    for x in range(len(letter_grid)):
+        for y in range(len(letter_grid[0])):
 
-    # Search vertical lines.
-    for column_number in range(len(letter_grid[0])):
-        line = [letter_grid[x][column_number] for x in range(len(letter_grid))]
-        substring_finds += search_lines(line)
+            small_grid = letter_grid[x : min(x + 4, len(letter_grid))]
+            for z in range(len(small_grid)):
+                small_grid[z] = small_grid[z][y : min(y + 4, len(letter_grid))]
 
-    # Search diagonal lines `/` this way.
-    for num in range(0, (len(letter_grid) + len(letter_grid[0])) // 2):
-        line = []
-        x = 0
-
-        row_length = len(letter_grid[x])
-        column_length = len(letter_grid[x][0])
-
-        wrap_count = 0
-        for x in range(num // 3, num + column_length, 1):
-            for y in range(min(num, column_length), -1, -1):
-                line.append(letter_grid[x % column_length][y])
-
-            wrap_count = x // column_length
-
-        print(line)
-    #     substring_finds += search_lines(line)
-
-    # # Search diagonal lines `/` this way, this is the second half, excluding the main diagonal.
-    # for num in range(1, ((len(letter_grid) + len(letter_grid[0])) // 2)):
-    #     line = []
-    #     x = 1
-    #     for y in range(num, 0, -1):
-    #         line.append(letter_grid[-x][-y])
-    #         x += 1
-
-    #     print(line)
-    #     substring_finds += search_lines(line)
-
-    # # Search diagonal lines `\` this way, this is the first half, including the biggest diagonal.
-    # for num in range(1, (len(letter_grid) + len(letter_grid[0])) // 2):
-    #     line = []
-    #     y = 0
-    #     for x in range(num, -1, -1):
-    #         line.append(letter_grid[x][y])
-    #         y += 1
-
-    #     print(line)
-    #     substring_finds += search_lines(line)
-
-    # # Search diagonal lines `\` this way, this is the second half, excluding the main diagonal.
-    # for num in range(1, ((len(letter_grid) + len(letter_grid[0])) // 2)):
-    #     line = []
-    #     y = 1
-    #     for x in range(num, 0, -1):
-    #         line.append(letter_grid[-x][-y])
-    #         y += 1
-
-    #     print(line)
-    #     substring_finds += search_lines(line)
+            substring_finds += _check_small_grid(small_grid)
 
     return substring_finds
+
 
 if __name__ == "__main__":
     print(task())

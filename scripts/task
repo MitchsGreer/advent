@@ -1,0 +1,15 @@
+#!/bin/bash
+# =============================================================================
+# This script will create a new task directory and skeleton based on the input
+# directory.
+#
+# Usage:
+#   new_task.sh [DIRECTORY]
+#
+#   DIRECTORY   The directory to place the new task. The basenamae is used as
+#               the task number.
+# =============================================================================
+echo "-----------------------------------------------------------------------------"
+echo Making a new task at $1.
+echo "-----------------------------------------------------------------------------"
+python -m copier copy --data "task_number=$(basename $1)" template/ $1

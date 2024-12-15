@@ -45,10 +45,10 @@ def task() -> int:
     """
     input_str = from_txt(__INPUT_FILE)
 
-    matches = re.findall("mul\(\d+,\d+\)", input_str)
+    matches = re.findall(r"mul\(\d+,\d+\)", input_str)
     num_of_products = 0
     for match in matches:
-        parsed = re.match("(?:mul)\((\d+),(\d+)\)", match)
+        parsed = re.match(r"(?:mul)\((\d+),(\d+)\)", match)
 
         num_1 = parsed.group(1)
         num_2 = parsed.group(2)
