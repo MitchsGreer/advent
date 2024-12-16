@@ -95,14 +95,16 @@ In this example, the guard will visit 41 distinct positions on your map.
 Predict the path of the guard. How many distinct positions will the guard visit before leaving the mapped area?
 """
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Tuple, Union
-from dataclasses import dataclass
+
 
 @dataclass
 class Coordinate:
     row: int
     column: int
+
 
 __INPUT_FILE = Path(Path(__file__).parent, "task_6_1.txt")
 
@@ -146,7 +148,10 @@ def _find_start(grid: List[List[str]]) -> Coordinate:
 
     return Coordinate(start_row, start_column)
 
-def _move_down(grid: List[List[str]], coords: Coordinate) -> Tuple[bool, int, Coordinate]:
+
+def _move_down(
+    grid: List[List[str]], coords: Coordinate
+) -> Tuple[bool, int, Coordinate]:
     """Move down through the grid until we hit an obstacle or go off of the grid.
 
     Args:
@@ -167,12 +172,16 @@ def _move_down(grid: List[List[str]], coords: Coordinate) -> Tuple[bool, int, Co
             ending_coords = Coordinate(row - 1, coords.column)
             break
 
-        else:
+        elif grid[row][coords.column] != "V":
+            grid[row][coords.column] = "V"
             cells_visited += 1
 
-    return not hit_obstacle, cells_visited, ending_coords
+    return hit_obstacle, cells_visited, ending_coords
 
-def _move_right(grid: List[List[str]], coords: Coordinate) -> Tuple[bool, int, Coordinate]:
+
+def _move_right(
+    grid: List[List[str]], coords: Coordinate
+) -> Tuple[bool, int, Coordinate]:
     """Move right through the grid until we hit an obstacle or go off of the grid.
 
     Args:
@@ -193,10 +202,11 @@ def _move_right(grid: List[List[str]], coords: Coordinate) -> Tuple[bool, int, C
             ending_coords = Coordinate(coords.row, column - 1)
             break
 
-        else:
+        elif grid[coords.row][column] != "V":
+            grid[coords.row][column] = "V"
             cells_visited += 1
 
-    return not hit_obstacle, cells_visited, ending_coords
+    return hit_obstacle, cells_visited, ending_coords
 
 
 def _move_up(grid: List[List[str]], coords: Coordinate) -> Tuple[bool, int, Coordinate]:
@@ -220,12 +230,16 @@ def _move_up(grid: List[List[str]], coords: Coordinate) -> Tuple[bool, int, Coor
             ending_coords = Coordinate(row + 1, coords.column)
             break
 
-        else:
+        elif grid[row][coords.column] != "V":
+            grid[row][coords.column] = "V"
             cells_visited += 1
 
-    return not hit_obstacle, cells_visited, ending_coords
+    return hit_obstacle, cells_visited, ending_coords
 
-def _move_left(grid: List[List[str]], coords: Coordinate) -> Tuple[bool, int, Coordinate]:
+
+def _move_left(
+    grid: List[List[str]], coords: Coordinate
+) -> Tuple[bool, int, Coordinate]:
     """Move left through the grid until we hit an obstacle or go off of the grid.
 
     Args:
@@ -243,13 +257,15 @@ def _move_left(grid: List[List[str]], coords: Coordinate) -> Tuple[bool, int, Co
         # Obstruction hit! Stop moving and return previous coordinates.
         if grid[coords.row][column] == "#":
             hit_obstacle = True
-            ending_coords = (coords.row, column + 1)
+            ending_coords = Coordinate(coords.row, column + 1)
             break
 
-        else:
+        elif grid[coords.row][column] != "V":
+            grid[coords.row][column] = "V"
             cells_visited += 1
 
-    return not hit_obstacle, cells_visited, ending_coords
+    return hit_obstacle, cells_visited, ending_coords
+
 
 def _travel(grid: List[List[str]], starting_coords: Coordinate) -> int:
     """Travel the guard through the grid until the leave it.
@@ -261,17 +277,23 @@ def _travel(grid: List[List[str]], starting_coords: Coordinate) -> int:
     Returns:
         The number of squares, including the first one, the guard visited.
     """
-    visited_cells = 1
+    visited_cells = 0
 
     guard_in_grid = True
     current_coordinates = starting_coords
     while guard_in_grid:
 
         for move in [_move_up, _move_right, _move_down, _move_left]:
-            guard_in_grid, spaces_visited, current_coordinates = move(grid, current_coordinates)
+
+            if not guard_in_grid:
+                break
+
+            guard_in_grid, spaces_visited, current_coordinates = move(
+                grid, current_coordinates
+            )
             visited_cells += spaces_visited
 
-    return spaces_visited
+    return visited_cells
 
 
 def task() -> int:
@@ -286,4 +308,4 @@ def task() -> int:
 
 
 if __name__ == "__main__":
-    print(task())  # Looking for 41.
+    print(task())
