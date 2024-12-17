@@ -32,9 +32,10 @@ The engineers just need the total calibration result, which is the sum of the te
 Determine which equations could possibly be true. What is their total calibration result?
 """
 
+from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Union
-from dataclasses import dataclass
+
 
 @dataclass
 class Problem:
@@ -82,18 +83,19 @@ def task() -> int:
         for op_rep in range(num_operators):
             bin_op_rep = bin(op_rep)[2:].rjust(len(bin(num_operators)[2:]) - 1, "0")
 
-            bin_op_rep = bin_op_rep.replace("1", "+")
-            bin_op_rep = bin_op_rep.replace("0", "*")
-
-            equation = str(problem.nums[0])
+            value = problem.nums[0]
             for index, num in enumerate(problem.nums[1:]):
-                equation += f" {bin_op_rep[index]} {num}"
+                if bin_op_rep[index] == "0":
+                    value += num
+                elif bin_op_rep[index] == "1":
+                    value *= num
 
-            if eval(equation) == problem.solution:
+            if value == problem.solution:
                 total_solutions += problem.solution
                 break
 
     return total_solutions
+
 
 if __name__ == "__main__":
     print(task())
